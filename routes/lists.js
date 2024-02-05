@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const List = require("../models/list");
+const { lock } = require("./items");
 
 const getList = async (req, res, next) => {
   let list;
@@ -31,15 +32,28 @@ router.get("/:listId", getList, (_req, res) => {
 });
 
 router.patch("/:listId", getList, async (req, res) => {
-  console.log(req.body);
   if (req.body != null) {
-    res.list.items = req.body;
+    res.list.items = [...res.list.items, req.body];
   }
+
   try {
     const updatedList = await res.list.save();
     res.status(201).send(updatedList);
   } catch (err) {
     res.status(400).json({ message: err.message });
+  }
+});
+
+router.put("/:listId", getList, async (req, res) => {
+  if (req.body != null) {
+    res.list.items = res.list.items.filter((item, i) => (item._id = !req.body[i]));
+  }
+
+  try {
+    const updatedListItems = res.list.save();
+    res.status(200).send(updatedListItems);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
 
