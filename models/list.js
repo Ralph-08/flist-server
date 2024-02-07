@@ -6,6 +6,10 @@ const listSchema = new mongoose.Schema({
     required: true,
     default: true,
   },
+  finalized: {
+    type: Boolean,
+    default: false
+  },
   items: {
     type: Array,
     required: true,

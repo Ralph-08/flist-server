@@ -19,6 +19,9 @@ app.use("/items", itemsRouter);
 const listsRouter = require("./routes/lists");
 app.use("/lists", listsRouter);
 
+const ordersRouter = require("./routes/orders");
+app.use("/orders", ordersRouter)
+
 app.listen(process.env.PORT, () => {
   console.log(`Server is running on ${process.env.PORT}`);
 });

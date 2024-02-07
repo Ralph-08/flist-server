@@ -57,4 +57,16 @@ router.put("/:listId", getList, async (req, res) => {
   }
 });
 
+router.delete("/:listId", getList, async (req, res) => {
+
+  res.list.items = []
+
+  try {
+    const clearedList = await res.list.save();
+    res.status(202).send(clearedList);
+  } catch (err) {
+    res.status(500).json({ message: err.message })
+  }
+})
+
 module.exports = router;
