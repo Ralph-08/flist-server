@@ -14,7 +14,7 @@ router.get("/", async (_req, res) => {
 });
 
 router.post("/", async (req, res) => {
-    console.log([...req.body]);
+    // console.log([...req.body]);
     // try {
     //     const newOrder = new Order({
     //         items: [...req.body]

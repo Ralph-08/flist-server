@@ -10,8 +10,6 @@ const db = mongoose.connection;
 db.on("error", (error) => console.log(error));
 db.once("open", () => console.log("Connectected to databse"));
 
-console.log(db.collection("items"));
-
 app.use(cors());
 app.use(express.json());
 
