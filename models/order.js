@@ -2,12 +2,11 @@ const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema({
     order_date: {
-        type: Date,
-        required: true,
-        default: Date.now,
+        type: Number,
+        default: Date.now(),
     },
     items: {
-        type: Array,
+        type: Object,
         required: true
     }
 });
