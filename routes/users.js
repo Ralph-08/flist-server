@@ -1,7 +1,25 @@
+require("dotenv").config();
 const express = require("express");
 const router = express.Router();
+const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const User = require("../models/user");
+
+router.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = await User.find({ email: email });
+  if (!user.length) return res.send().status(404);
+
+  const isPasswordMatch = bcrypt.compareSync(password, user[0].password);
+  if (!isPasswordMatch) return res.send().status(400);
+
+  const token = jwt.sign({ id: user.id, email: user.id }, process.env.JWT_KEY, {
+    expiresIn: "24h",
+  });
+
+  res.status(200).json({ token: token });
+});
 
 router.post("/signup", async (req, res) => {
   const { email, password } = req.body;
