@@ -1,6 +1,10 @@
 const mongoose = require("mongoose");
 
 const listSchema = new mongoose.Schema({
+  user: {
+    type: String,
+    required: true,
+  },
   weekly_list: {
     type: Boolean,
     required: true,
@@ -8,7 +12,7 @@ const listSchema = new mongoose.Schema({
   },
   finalized: {
     type: Boolean,
-    default: false
+    default: false,
   },
   items: {
     type: Array,

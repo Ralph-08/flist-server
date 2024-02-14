@@ -1,5 +1,7 @@
+require("dotenv").config();
 const express = require("express");
 const router = express.Router();
+const jwt = require("jsonwebtoken");
 const List = require("../models/list");
 const { lock } = require("./items");
 
@@ -18,9 +20,21 @@ const getList = async (req, res, next) => {
   next();
 };
 
-router.get("/", async (_req, res) => {
+router.get("/", async (req, res) => {
+  const reqToken = await req.headers.authorization?.split(" ")[1];
+  console.log(reqToken);
+  if (!reqToken) {
+    return;
+  }
+
+  let decodedToken = jwt.verify(
+    req.headers.authorization?.split(" ")[1],
+    process.env.JWT_KEY
+  );
+
   try {
-    const lists = await List.find();
+    const lists = await List.find({ user: decodedToken.id });
+    // console.log(lists);
     res.json(lists);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -46,7 +60,9 @@ router.patch("/:listId", getList, async (req, res) => {
 
 router.put("/:listId", getList, async (req, res) => {
   if (req.body != null) {
-    res.list.items = res.list.items.filter((item, i) => (item._id = !req.body[i]));
+    res.list.items = res.list.items.filter(
+      (item, i) => (item._id = !req.body[i])
+    );
   }
 
   try {
@@ -58,15 +74,14 @@ router.put("/:listId", getList, async (req, res) => {
 });
 
 router.delete("/:listId", getList, async (req, res) => {
-
-  res.list.items = []
+  res.list.items = [];
 
   try {
     const clearedList = await res.list.save();
     res.status(202).send(clearedList);
   } catch (err) {
-    res.status(500).json({ message: err.message })
+    res.status(500).json({ message: err.message });
   }
-})
+});
 
 module.exports = router;
