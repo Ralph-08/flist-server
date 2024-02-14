@@ -3,7 +3,6 @@ const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 const List = require("../models/list");
-const { lock } = require("./items");
 
 const getList = async (req, res, next) => {
   let list;
@@ -21,20 +20,15 @@ const getList = async (req, res, next) => {
 };
 
 router.get("/", async (req, res) => {
-  const reqToken = await req.headers.authorization?.split(" ")[1];
-  console.log(reqToken);
-  if (!reqToken) {
-    return;
-  }
+  const reqToken = await req.headers.authorization.split(" ")[1];
 
   let decodedToken = jwt.verify(
-    req.headers.authorization?.split(" ")[1],
+    reqToken,
     process.env.JWT_KEY
   );
 
   try {
-    const lists = await List.find({ user: decodedToken.id });
-    // console.log(lists);
+    const lists = await List.find({ user: decodedToken.id});
     res.json(lists);
   } catch (err) {
     res.status(500).json({ message: err.message });
