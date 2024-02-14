@@ -14,10 +14,16 @@ router.post("/login", async (req, res) => {
   const isPasswordMatch = bcrypt.compareSync(password, user[0].password);
   if (!isPasswordMatch) return res.send().status(400);
 
-  const token = jwt.sign({ id: user.id, email: user.id }, process.env.JWT_KEY, {
-    expiresIn: "24h",
-  });
+  const userId = user[0]._id.toString().replace(/ObjectId\("(.*)"\)/, "$1");
 
+  const token = jwt.sign(
+    { id: userId, email: user[0].email },
+    process.env.JWT_KEY,
+    {
+      expiresIn: "24h",
+    }
+  );
+  
   res.status(200).json({ token: token });
 });
 
