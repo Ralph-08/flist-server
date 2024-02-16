@@ -8,7 +8,11 @@ const orderSchema = new mongoose.Schema({
     items: {
         type: Object,
         required: true
-    }
+    },
+    user: {
+        type: String,
+        required: true,
+    },
 });
 
 module.exports = mongoose.model("Order", orderSchema);

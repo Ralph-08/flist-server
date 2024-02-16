@@ -20,15 +20,10 @@ const getList = async (req, res, next) => {
 };
 
 router.get("/", async (req, res) => {
-  const reqToken = await req.headers.authorization.split(" ")[1];
-
-  let decodedToken = jwt.verify(
-    reqToken,
-    process.env.JWT_KEY
-  );
-
+  const reqToken = req.headers.authorization.split(" ")[1];
+  const decodedToken = jwt.verify(reqToken, process.env.JWT_KEY);
   try {
-    const lists = await List.find({ user: decodedToken.id});
+    const lists = await List.find({ user: decodedToken.id });
     res.json(lists);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -37,6 +32,21 @@ router.get("/", async (req, res) => {
 
 router.get("/:listId", getList, (_req, res) => {
   res.send(res.list);
+});
+
+router.post("/", async (req, res) => {
+  const reqToken = req.body.token.split(" ")[1];
+  const decodedToken = jwt.verify(reqToken, process.env.JWT_KEY);
+  try {
+    const newList = await new List({
+      user: decodedToken.id,
+      weekly_list: req.body.weekly_list,
+    });
+    await newList.save();
+    res.status(201).json(newList);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 router.patch("/:listId", getList, async (req, res) => {
@@ -67,12 +77,11 @@ router.put("/:listId", getList, async (req, res) => {
   }
 });
 
-router.delete("/:listId", getList, async (req, res) => {
-  res.list.items = [];
-
+router.delete("/:listId", async (req, res) => {
   try {
-    const clearedList = await res.list.save();
-    res.status(202).send(clearedList);
+    const findList = await List.findById(req.params.listId);
+    await findList.deleteOne();
+    res.status(202).send("List deleted");
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
