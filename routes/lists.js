@@ -1,7 +1,8 @@
+require("dotenv").config();
 const express = require("express");
 const router = express.Router();
+const jwt = require("jsonwebtoken");
 const List = require("../models/list");
-const { lock } = require("./items");
 
 const getList = async (req, res, next) => {
   let list;
@@ -18,9 +19,11 @@ const getList = async (req, res, next) => {
   next();
 };
 
-router.get("/", async (_req, res) => {
+router.get("/", async (req, res) => {
+  const reqToken = req.headers.authorization.split(" ")[1];
+  const decodedToken = jwt.verify(reqToken, process.env.JWT_KEY);
   try {
-    const lists = await List.find();
+    const lists = await List.find({ user: decodedToken.id });
     res.json(lists);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -29,6 +32,21 @@ router.get("/", async (_req, res) => {
 
 router.get("/:listId", getList, (_req, res) => {
   res.send(res.list);
+});
+
+router.post("/", async (req, res) => {
+  const reqToken = req.body.token.split(" ")[1];
+  const decodedToken = jwt.verify(reqToken, process.env.JWT_KEY);
+  try {
+    const newList = await new List({
+      user: decodedToken.id,
+      weekly_list: req.body.weekly_list,
+    });
+    await newList.save();
+    res.status(201).json(newList);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 router.patch("/:listId", getList, async (req, res) => {
@@ -45,8 +63,9 @@ router.patch("/:listId", getList, async (req, res) => {
 });
 
 router.put("/:listId", getList, async (req, res) => {
-  if (req.body != null) {
-    res.list.items = res.list.items.filter((item, i) => (item._id = !req.body[i]));
+  if (!req.body.length) return;
+  for (let i = 0; i < req.body.length; i++) {
+    res.list.items = res.list.items.filter((item) => item._id !== req.body[i]);
   }
 
   try {
@@ -57,16 +76,14 @@ router.put("/:listId", getList, async (req, res) => {
   }
 });
 
-router.delete("/:listId", getList, async (req, res) => {
-
-  res.list.items = []
-
+router.delete("/:listId", async (req, res) => {
   try {
-    const clearedList = await res.list.save();
-    res.status(202).send(clearedList);
+    const findList = await List.findById(req.params.listId);
+    await findList.deleteOne();
+    res.status(202).send("List deleted");
   } catch (err) {
-    res.status(500).json({ message: err.message })
+    res.status(500).json({ message: err.message });
   }
-})
+});
 
 module.exports = router;

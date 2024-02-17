@@ -13,6 +13,9 @@ db.once("open", () => console.log("Connectected to databse"));
 app.use(cors());
 app.use(express.json());
 
+const usersRouter = require("./routes/users");
+app.use("/users", usersRouter);
+
 const itemsRouter = require("./routes/items");
 app.use("/items", itemsRouter);
 
