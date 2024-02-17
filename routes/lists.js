@@ -63,10 +63,9 @@ router.patch("/:listId", getList, async (req, res) => {
 });
 
 router.put("/:listId", getList, async (req, res) => {
-  if (req.body != null) {
-    res.list.items = res.list.items.filter(
-      (item, i) => (item._id = !req.body[i])
-    );
+  if (!req.body.length) return;
+  for (let i = 0; i < req.body.length; i++) {
+    res.list.items = res.list.items.filter((item) => item._id !== req.body[i]);
   }
 
   try {
