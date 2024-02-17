@@ -7,8 +7,7 @@ const listSchema = new mongoose.Schema({
   },
   weekly_list: {
     type: Boolean,
-    required: true,
-    default: true,
+    default: false
   },
   finalized: {
     type: Boolean,
@@ -16,7 +15,7 @@ const listSchema = new mongoose.Schema({
   },
   items: {
     type: Array,
-    required: true,
+    default: [],
   },
 });
 
